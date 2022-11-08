@@ -65,7 +65,7 @@ Components used (from left-up to right-down):
   - DIN-power supply
   - EMI noise filter on 230V line input
 * (bottom row)
-  - Arduiono MKR Zero/ETH on MKR carrier
+  - Arduino MKR Zero/ETH on MKR carrier
   - speaker (Grove)
   - OLED display and LED Matrix display
   - ADC for reference mini PV panel (Grove)
