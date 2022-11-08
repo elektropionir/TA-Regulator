@@ -49,8 +49,8 @@
  Shield. It can be made compatible with other platforms through by including
  platform specific instructions available from the original Regulator sketch.
 
- Hardware modifications made: a larger heatsink is connetced to the RobotDyn
- triac module (to prevent overheating), a subber is connected to the triac
+ Hardware modifications made: a larger heatsink is connected to the RobotDyn
+ triac module (to prevent overheating), a snubber is connected to the triac
  module (to prevent blowing-out the triac), and EMI line filters are put on
  the incoming and outgoing power line (to prevent distortion on the AC line
  from the dimmer regulation).
