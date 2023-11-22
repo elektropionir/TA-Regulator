@@ -52,8 +52,9 @@ void csvLogLoop() {
   }
 
 if (state == RegulatorState::REGULATING) { 
-    lines.printf(F("%02d:%02d:%02d;%03d;%04d;%04d;%05d;%04d;%04d;%03d;%03d\r\n"), hour(t), minute(t), second(t),
-        heatingPower, insolPowerAvg, inverterAC, meterPower, insol, tresholdAvg, elsensPower, voltage);
+    lines.printf(F("%02d:%02d:%02d;%03d;%04d;%04d;%05d;%04d;%04d;%03d;%03d\r\n"), 
+    hour(t), minute(t), second(t),
+    heatingPower, insolRefAvg, inverterAC, meterPower, insol, tresholdAvg, elsensPower, voltage);
   }
 }
 

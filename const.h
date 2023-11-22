@@ -35,6 +35,9 @@ const byte SD_SS_PIN = SDCARD_SS_PIN; // internal pin of MKR ZERO
 // power settings specific to storage heater
 const int MAX_POWER = 760; // the max load of the TA-heater at 230V
 const int MAX_ACCUMULATE = 4800; // Wh, 6400 is theoretical max, 4650 is usually achieved
+const int RECOVERY_CHARGE = 6400; // Wh, in case of too low ambiental temperature
+const float MIN_AMB_TEMP = 19.5; // min. ambiental temperature below which Charge Forecast is disabled
+const float MAX_AMB_TEMP = 24.0; // max. ambiental temperature at which PowerPilot gets suspended to avoid room overheat on warm day roomTemptreshold
 
 const IPAddress galvoAddress(192,168,0,65);
 
@@ -68,8 +71,10 @@ enum {
 };
 
 struct Stats {
-  long heatingTime = 0; // minutes
   long consumedPower = 0; // watts
 };
 
+struct insolStats {
+ long insolationPower = 0; // watts
+};
 #endif

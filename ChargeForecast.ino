@@ -26,7 +26,6 @@ int forecastTrend = 0; // 1 = raising, 2 = falling, 3 = steady, 0 = no data
 // chargeSetRatio x/100 > sunny = 25, sunny/cloudy = 50, worsening = 75, cloudy = 100, rainy = 100
 
 float temperature;
-//int temperature;
 int humidity;
 int pressure;
 int altitude = 140; // the REAL altitude of the sensor, plot = 134, street = 132, 145 holds correction for temp
