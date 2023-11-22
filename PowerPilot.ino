@@ -15,7 +15,6 @@ const int MIN_START_POWER = 50; // W, lowest treshold for PowerPilot start
 const int INSOL_BUFFER = 10; // W, safety net on low insol levels// 30
 const int BYPASS_POWER = 700; // when the TA-heater goes in bypass mode (relay) // 700
 const int BYPASS_MIN_START_POWER = BYPASS_POWER + 20;
-const float roomTemptreshold = 24.1; // temp at which PowerPilot gets suspended to avoid room overheat on warm day
 
 float tresholdMAvg; // value for moving average
 long tresholdReport; // delay in updating tresholdAv
@@ -25,46 +24,55 @@ unsigned long nTRS; // number of samples
 void pilotLoop() {
 
 // sum available power
-   short availablePower = heatingPower + meterPower + (insolPowerAvg * 0.95) - inverterAC - INSOL_BUFFER; // 0.95 to be on safe side
+   short availablePower = heatingPower + meterPower + (insolRefAvg * 0.95) - inverterAC - INSOL_BUFFER; // 0.95 to be on safe side
 
-// PV Throttled "overdraw" protection
-// checks if heatingPower pushes meterPower into minus on underperfoming PV output (compared to PV reference panel, i.e. snow)
+// ** PROTECTIONS **
+
+// (1) suspending on low startup power
+  if (!MQTT_ON && heatingPower == 0 && availablePower < MIN_START_POWER) { // interferes with MQTT setPower = 0
+    return;
+    }
+// (2) PV Throttled "overdraw" protection
+//  if heatingPower pushes meterPower into minus on underperfoming PV output (compared to PV reference panel, i.e. snow)
     tresholdAveraging(); // we have to be patient as the inverter needs time to ramp up to the power consumption demand
-    if (((float) insolPowerAvg / (inverterAC + 1)  >= 1.20) && tresholdAvg <= -50) { // in case PV underperforms, don't draw power
+    if (((float) insolRefAvg / (inverterAC + 1)  >= 1.20) && tresholdAvg <= -50) { // in case PV underperforms, don't draw power
     availablePower = 0;
-    pilotThrottled = true; // status to display
+    powerPilotRaw = 0;
+    heatingPower = 0;
+    pilotThrottled = true; // report status to display
   } else {
     pilotThrottled = false;
   }
-
-// overheating protection (to avoid charging in warm weather conditions)
-    if (temperature >= roomTemptreshold) { // in case room temperature surpasses upper limit set power to zero
+// (3) avoid charging in hot weather conditions
+    if (temperature >= MAX_AMB_TEMP) { // in case room temperature surpasses upper limit set power to zero
     availablePower = 0;
-    pilotSuspended = true; // status to display
+    powerPilotRaw = 0;
+    heatingPower = 0; 
+    state = RegulatorState::MONITORING;
+    pilotSuspended = true; // report status to display
   } else {
     pilotSuspended = false;
   }
-  
-// set pilot strategy
+
+// ** SETTING PILOT STRATEGY **
 
 // case: MQTT set
   if (setPower > 0) { // MQTT setting overrules regulation
       availablePower = setPower; 
       state = RegulatorState::MANUAL_RUN;
     }
-// case: NightCharge 
+// case: NightCharge set
   if (nightCall) { // check if nightcharge is on    
   chargeSetLevel = (0.67 * MAX_ACCUMULATE) + (0.33* MAX_ACCUMULATE * chargeSetRatio / 100); // accumulation at 62,5%, 75%, 87,5%, or 100% of MAX
+  if (temperature <= MIN_AMB_TEMP) { // prevent charge limiting when ambiental temperature is below min. (we will need max. heat available)
+  chargeSetLevel = RECOVERY_CHARGE;
+}
     if (nightChargeHours() && statsAccumulatedPowerToday() <= chargeSetLevel) {  
     availablePower = MAX_POWER;
     state = RegulatorState::ACCUMULATE;
     }
   }
-    
-// case: suspend on low startup power
-  if (!MQTT_ON && heatingPower == 0 && availablePower < MIN_START_POWER) { // interferes with MQTT setPower = 0
-    return;
-    }
+
 // case: Bypass relay active
   if (bypassRelayOn && availablePower > BYPASS_POWER)
     return;
@@ -90,7 +98,7 @@ void pilotLoop() {
 // case: regulating
 if (availablePower >= MIN_START_POWER && setPower == 0 && !nightChargeHours()) { // – are we regulating?
     state = RegulatorState::REGULATING;    
-    }  
+    }
 
 // bypass the triac for max power
 boolean bypass = availablePower > (bypassRelayOn ? BYPASS_POWER : BYPASS_MIN_START_POWER);

@@ -64,71 +64,62 @@ void displayLoop() {
     }               
     sprintf(str,"%03d",elsensPower);
     display.setFixedFont( ssd1306xled_font8x16 );
-    display.printFixed(48, 0, str, STYLE_BOLD); // ssd1327
+    display.printFixed(44, 0, str, STYLE_BOLD); // ssd1327
     display.setFixedFont( ssd1306xled_font6x8 );
-    display.printFixed(74, 8, "w", STYLE_NORMAL);
+    display.printFixed(70, 8, "w", STYLE_NORMAL);
 
 //  display state
     display.printFixed(0, 20, "STATE:", STYLE_NORMAL);
     if (state == RegulatorState::MONITORING) {
-    display.printFixed(48, 20, "monitoring", STYLE_BOLD); 
+    display.printFixed(44, 20, "monitoring", STYLE_BOLD); 
     }
     if (state == RegulatorState::REGULATING) {
-    display.printFixed(48, 20, "regulating", STYLE_NORMAL);
+    display.printFixed(44, 20, "regulating", STYLE_NORMAL);
     }
     if (state == RegulatorState::MANUAL_RUN) {
-    display.printFixed(48, 20, "manual    ", STYLE_NORMAL); 
+    display.printFixed(44, 20, "manual    ", STYLE_NORMAL); 
     }    
     if (state == RegulatorState::ACCUMULATE) {
-    display.printFixed(48, 20, "charging  ", STYLE_NORMAL); 
+    display.printFixed(44, 20, "charging  ", STYLE_NORMAL); 
     }  
 
 // display solar sensor average (W)
   display.printFixed(0, 32, "INsol:", STYLE_NORMAL);
-  sprintf(str,"%04d",insolPowerAvg); // insol AV
-  display.printFixed(48, 32, str, STYLE_NORMAL);
+  sprintf(str,"%04d",insolRefAvg); // insol AV
+  display.printFixed(44, 32, str, STYLE_NORMAL);
   
 // display inverter AC Power
   display.printFixed(0, 40, "PVpow:", STYLE_NORMAL);
   sprintf(str,"%04d",inverterAC);
-  display.printFixed(48, 40, str, STYLE_NORMAL);
-// display throttled status
-//  if (inverterThrottled == true) {
-//  display.printFixed(76, 40, "T", STYLE_NORMAL);
-//  }
-//  else {
-//  display.printFixed(76, 40, " ", STYLE_NORMAL);
-//  }
-  
+  display.printFixed(44, 40, str, STYLE_NORMAL);
 
 // display Meter Power 
   display.printFixed(0, 48, "Meter:", STYLE_NORMAL);
   sprintf(str,"%04d",abs(meterPower));
-  display.printFixed(48, 48, str, STYLE_NORMAL);
+  display.printFixed(44, 48, str, STYLE_NORMAL);
   if (meterPower < 0) {
-  display.printFixed(40, 48, "-", STYLE_NORMAL);
+  display.printFixed(36, 48, "-", STYLE_NORMAL);
   }
   if (meterPower >= 0) {
-  display.printFixed(40, 48, " ", STYLE_NORMAL);
+  display.printFixed(36, 48, " ", STYLE_NORMAL);
   }
 
 // display throttled status
   if (pilotThrottled == true) {
-  display.printFixed(76, 48, "T", STYLE_NORMAL);
+  display.printFixed(72, 48, "X", STYLE_NORMAL);
   }
   else {
-  display.printFixed(76, 48, " ", STYLE_NORMAL);
+  display.printFixed(72, 48, " ", STYLE_NORMAL);
   }
 
 // display suspended status
-if (state == RegulatorState::MONITORING && pilotSuspended == true) {
-  display.printFixed(96, 48, "T>!", STYLE_NORMAL);
+if (pilotSuspended == true) {
+  display.printFixed(92, 48, "T>!", STYLE_NORMAL);
   }
   else {
-  display.printFixed(96, 48, "   ", STYLE_NORMAL);
+  display.printFixed(92, 48, "   ", STYLE_NORMAL);
   }
 
- 
 // display forecastIndex > sunny = 1, sunny/cloudy = 2, worsening = 3, cloudy = 4, rainy = 5
   display.printFixed(0, 60, "Sky", STYLE_NORMAL);
   sprintf(str,"%02d",Z);
@@ -136,62 +127,66 @@ if (state == RegulatorState::MONITORING && pilotSuspended == true) {
   display.printFixed(30, 60, ":", STYLE_NORMAL);
 
   if (forecastTrend == 0) {
-    display.printFixed(48, 60, "-//- ", STYLE_NORMAL);
+    display.printFixed(44, 60, "-//- ", STYLE_NORMAL);
   }
   else {
   if (forecastIndex == 1) {
-    display.printFixed(48, 60, "sunny     ", STYLE_NORMAL);
+    display.printFixed(44, 60, "sunny     ", STYLE_NORMAL);
   }
   if (forecastIndex == 2) {
-    display.printFixed(48, 60, "partly sun", STYLE_NORMAL); // mixed sun
+    display.printFixed(44, 60, "partly sun", STYLE_NORMAL); // mixed sun
   }
   if (forecastIndex == 3) {
-    display.printFixed(48, 60, "worsening ", STYLE_NORMAL);
+    display.printFixed(44, 60, "worsening ", STYLE_NORMAL);
   }
   if (forecastIndex == 4) {
-    display.printFixed(48, 60, "cloudy    ", STYLE_NORMAL); // overcast
+    display.printFixed(44, 60, "cloudy    ", STYLE_NORMAL); // overcast
   }
   if (forecastIndex == 5) {
-    display.printFixed(48, 60, "rainy     ", STYLE_NORMAL);
+    display.printFixed(44, 60, "rainy     ", STYLE_NORMAL);
   }
   }
   
 // display trend and pressure, 1 = raising, 2 = falling, 3 = steady, 0 = no data
   if (forecastTrend == 1) {
-    display.printFixed(112, 60, "++", STYLE_NORMAL);
+    display.printFixed(108, 60, "++", STYLE_NORMAL);
   }
   if (forecastTrend == 2) {
-    display.printFixed(112, 60, "--", STYLE_NORMAL);
+    display.printFixed(108, 60, "--", STYLE_NORMAL);
   }  
   if (forecastTrend == 3) {
-    display.printFixed(112, 60, "<>", STYLE_NORMAL);
+    display.printFixed(108, 60, "<>", STYLE_NORMAL);
   }
 
-// display kWh accumulated
+// display kWh accumulated per day
   display.printFixed(0, 72, "kWh/d:", STYLE_NORMAL);
   sprintf(str,"%.2f",((float) statsAccumulatedPowerToday()/1000.0)); // kWh on day
-  display.printFixed(48, 72, str, STYLE_NORMAL);
-  display.printFixed(76, 72, "ACC", STYLE_NORMAL); // charge
+  display.printFixed(44, 72, str, STYLE_NORMAL);
+  display.printFixed(72, 72, "ACC", STYLE_NORMAL); // charge
   if (nightCall == true) { 
-  display.printFixed(96, 72, "/", STYLE_NORMAL);
+  display.printFixed(92, 72, "/", STYLE_NORMAL);
   sprintf(str,"%.2f",((float) chargeSetLevel/1000.0)); // kWh charge level set
-  display.printFixed(104, 72, str, STYLE_NORMAL);
+  display.printFixed(100, 72, str, STYLE_NORMAL);
   }
-
-// display kWh manual
-  sprintf(str,"%.2f",((float) statsManualPowerToday()/1000.0)); // kWh on day
-  display.printFixed(48, 80, str, STYLE_NORMAL);
-  display.printFixed(76, 80, "MAN", STYLE_NORMAL); // manual
     
-// display kWh regulated
+// display kWh regulated per day
   sprintf(str,"%.2f",((float) statsRegulatedPowerToday()/1000.0)); // kWh on day
-  display.printFixed(48, 88, str, STYLE_NORMAL);
-  display.printFixed(76, 88, "REG", STYLE_NORMAL); // regulating
+  display.printFixed(44, 80, str, STYLE_NORMAL);
+  display.printFixed(72, 80, "REG", STYLE_NORMAL); // regulating
+
+// display kWh insolation per day
+  sprintf(str,"%.2f",((float) insolStatsInsolationPowerToday()/1000.0)); // kWh on day
+  display.printFixed(44, 88, str, STYLE_NORMAL);  
+  if ((float) insolStatsInsolationPowerToday()/1000.0 < 10) {
+   display.printFixed(72, 88, "SOL", STYLE_NORMAL);
+  } else { // we move one segment on the display
+  display.printFixed(80, 88, "SOL", STYLE_NORMAL);
+  }
 
 // display kWh regulated over year
   sprintf(str,"%.0f",((float) statsRegulatedPowerYear()/1000.0)); // kWh on day
-  display.printFixed(48, 96, str, STYLE_NORMAL);
-  display.printFixed(76, 96, "R/Y", STYLE_NORMAL); // regulating
+  display.printFixed(44, 96, str, STYLE_NORMAL);
+  display.printFixed(72, 96, "R/Y", STYLE_NORMAL); // regulating
 
   display.setColor(GRAY_COLOR4(20));
 
@@ -201,7 +196,7 @@ if (state == RegulatorState::MONITORING && pilotSuspended == true) {
   display.printFixed(14, 108, "kB", STYLE_NORMAL);
   
 // display IP
-  display.printFixed(48, 108, "192.168.0.61", STYLE_NORMAL);
+  display.printFixed(44, 108, "192.168.0.61", STYLE_NORMAL);
 
 // display Vac smart meter
   sprintf(str,"%.3d",voltage); // 
@@ -210,9 +205,9 @@ if (state == RegulatorState::MONITORING && pilotSuspended == true) {
 
 // display temp
   sprintf(str,"%.1f", temperature);
-  display.printFixed(48, 120, str, STYLE_NORMAL);
-  display.printFixed(74, 120, "'", STYLE_NORMAL);
-  display.printFixed(78, 120, "C", STYLE_NORMAL);
+  display.printFixed(44, 120, str, STYLE_NORMAL);
+  display.printFixed(70, 120, "'", STYLE_NORMAL);
+  display.printFixed(74, 120, "C", STYLE_NORMAL);
 
 // display current time 
 
@@ -225,14 +220,14 @@ if (state == RegulatorState::MONITORING && pilotSuspended == true) {
 // debugging
 
 //  display current sensor
-//    display.printFixed(96, 0, "#", STYLE_NORMAL);
+//    display.printFixed(92, 0, "#", STYLE_NORMAL);
 //    sprintf(str,"%04d",elsens);
-//    display.printFixed(104, 0, str, STYLE_NORMAL);
+//    display.printFixed(100, 0, str, STYLE_NORMAL);
 
-//  display heatingPower
-//    display.printFixed(96, 8, "P", STYLE_NORMAL);
+//  display heatingPower setting
+//    display.printFixed(92, 8, "P", STYLE_NORMAL);
 //    sprintf(str,"%04d",heatingPower);
-//    display.printFixed(104, 8, str, STYLE_NORMAL);
+//    display.printFixed(100, 8, str, STYLE_NORMAL);
 
 // display solar sensor (raw) 
   display.printFixed(96, 32, "#", STYLE_NORMAL);
@@ -241,12 +236,12 @@ if (state == RegulatorState::MONITORING && pilotSuspended == true) {
 
 // display Throttle threshold
 //  sprintf(str,"%.4d",abs(tresholdAvg));
-//  display.printFixed(104, 48, str, STYLE_NORMAL);
+//  display.printFixed(100, 48, str, STYLE_NORMAL);
 //   if (tresholdAvg < 0) {
-//  display.printFixed(96, 48, "-", STYLE_NORMAL);
+//  display.printFixed(92, 48, "-", STYLE_NORMAL);
 //  }
 //  if (tresholdAvg >= 0) {
-//  display.printFixed(96, 48, " ", STYLE_NORMAL);
+//  display.printFixed(92, 48, " ", STYLE_NORMAL);
 //  }
   
   }

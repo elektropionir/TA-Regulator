@@ -2,7 +2,7 @@
 
 // wiring diagram notes:
 // InSol Aviation Connector on Regulator housing: 1 = yellow, 2 = white, 3 = red, 4 = black
-// InSol UTP connection cable:      1 = blue , 2 = green, 3 = orange, 4 = brown
+// InSol 4-wire connection cable:      1 = blue , 2 = green, 3 = orange, 4 = brown
 // Insol Aviation Connector to PV panel: (1) brown = ground, (2) orange = Vpanel
 
 // Voltaic Systems 1W 6V Solar Panel (0.19A Isc shortcut current), shorted with a 15Ω 5W resister, and connected to ADC
@@ -17,9 +17,13 @@
 const byte REG_ADDR_RESULT = 0x00;
 const byte REG_ADDR_CONFIG = 0x02;
 
-float insolMAvg; // value for moving average to flatten out fluctuastions
-long insolReport; // delay in updating insolPowerAv
-unsigned long nSol; // number of samples
+// "Ref" values calculate the max output of the PV system from reference panel
+float insolRefMAvg; // value for moving average to flatten out fluctuastions
+long insolRefReport; // delay in updating insolPowerAv
+unsigned long nRefSol; // number of samples
+
+// "Power" values calculate the insolation power from reference panel
+
 
 void init_adc()
 {
@@ -68,33 +72,34 @@ void insolLoop()
 //  const float IS_ANGLE_SHIFT = PI * 0.01;
 
 // Grove ADC reading Isc of reference panel
-//  const int INSOL_MAX_VALUE = 2000; // 2000
-  const float INSOL_VALUE_COEF = 1.05; // 1.11
-
-  const int INSOL_VALUE_SHIFT = -15; // this corrects the baseline value
-  const int INSOL_MIN_VALUE = 20; // this sets the "noise" level
+  const float INSOL_REF_VALUE_COEF = 1.05; // 1.11
+  const int INSOL_REF_VALUE_SHIFT = -15; // this corrects the baseline value
+  const int INSOL_REF_MIN_VALUE = 20; // this sets the "noise" level
   
   insol = read_adc();
 
-  if (insol > INSOL_MIN_VALUE) {
-//    float ratio = 1.0 - ((float) insol / INSOL_MAX_VALUE);
-//    insolPower = (int) (insol * INSOL_VALUE_COEF * cos(IS_ANGLE_SHIFT + ratio * IS_ANGLE_INTERVAL)) + INSOL_VALUE_SHIFT;
-    insolPower = (int) (insol * INSOL_VALUE_COEF) + INSOL_VALUE_SHIFT; // simplified version
+// calculating the insolRef value
+  if (insol > INSOL_REF_MIN_VALUE) {
+    insolRef = (int) (insol * INSOL_REF_VALUE_COEF) + INSOL_REF_VALUE_SHIFT; // simplified version
   }
   else {
-    insolPower = 0;
+    insolRef = 0;
   }
 
- // floating average
-  nSol++; // update sample count
-  insolMAvg += (insolPower - insolMAvg) / nSol; // calculate moving average
+ // floating average for InsolRef
+  nRefSol++;
+  insolRefMAvg += (insolRef - insolRefMAvg) / nRefSol; // calculate moving average
     
-  if (loopStartMillis - insolReport > 5 * 1000) { // 5 secs polling
-  insolPowerAvg = insolMAvg; // retreive result after polling time
-  if (insolPowerAvg < 0) {
-    insolPowerAvg = 0;
+  if (loopStartMillis - insolRefReport > 5 * 1000) { // 5 secs polling
+  insolRefAvg = insolRefMAvg; // retreive result after polling time
+  if (insolRefAvg < 0) {
+    insolRefAvg = 0;
   }
-  insolReport = loopStartMillis;
-  nSol = 0; // to start a new averaging period, set number of samples (n) to zero
-  }    
+  insolRefReport = loopStartMillis;
+  nRefSol = 0; // to start a new averaging period, set number of samples (n) to zero
+  }
+  
+// calculating the in insolCalibPower value
+  insolCalibPower = insolRef; // we take this unless we have better (calibrated) value from pyranometer
+      
 }

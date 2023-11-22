@@ -105,11 +105,11 @@ boolean requestSymoRTC() {
       setTime(now() - SECS_PER_HOUR);
     }
   }
-  hourNow = hour();
-  minuteNow = minute();
 #ifdef ARDUINO_ARCH_SAMD
   rtc.setEpoch(now());
 #endif
+  hourNow = hour();
+  minuteNow = minute();
   return true;
 }
 

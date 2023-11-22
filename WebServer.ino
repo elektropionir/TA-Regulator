@@ -23,7 +23,7 @@ void webServerLoop() {
   if (client.connected()) {
     if (client.find(' ')) { // GET /fn HTTP/1.1
       char fn[20];
-      int l = client.readBytesUntil(' ', fn, sizeof(fn) - 1); // 
+      int l = client.readBytesUntil(' ', fn, sizeof(fn) - 1);
       fn[l] = 0;
       while (client.read() != -1);
       if (l == 1) {
@@ -132,14 +132,13 @@ void webServerServeFile(const char *fn, BufferedPrint& bp) {
 
 void printValuesJson(FormattedPrint& client) {
   client.printf(F("{\"st\":\"%c\",\"v\":\"%s\",\"r\":\"%d\",\"h\":%d,\"m\":%d,\"i\":%d,\"sol\":%d,\"trs\":%d,\"ec\":%d"),
-      state, version, bypassRelayOn, heatingPower, meterPower, inverterAC, insolPowerAvg, tresholdAvg, eventsRealCount(false)); // eventscount is new <<<<<<<<<<
+      state, version, bypassRelayOn, heatingPower, meterPower, inverterAC, insolRefAvg, tresholdAvg, eventsRealCount(false)); // eventscount is new <<<<<<<<<<
   byte errCount = eventsRealCount(true);
   if (errCount) {
     client.printf(F(",\"err\":%d"), errCount);
   }  
   switch (state) {
     case RegulatorState::MANUAL_RUN:
-      client.printf(F(",\"cp\":%d"), statsManualPowerToday());
       break;
     case RegulatorState::REGULATING:
     case RegulatorState::MONITORING:
