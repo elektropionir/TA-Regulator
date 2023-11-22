@@ -79,4 +79,6 @@ Components used (from left-up to right-down):
  the incoming and outgoing power line (to prevent distortion on the AC line
  from the dimmer regulation).
  
- 
+ ## Revisions
+
+ 2023.11.22 – sketch updated with minor bugfixes and with logging functionality of local PV Insolation
